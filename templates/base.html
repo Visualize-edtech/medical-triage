@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Medical Triage System{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'triage-immediate': '#dc2626',
+                        'triage-delayed': '#d97706',
+                        'triage-minimal': '#16a34a',
+                        'triage-expectant': '#6b7280'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* High contrast, touch-friendly styles for medical emergency use */
+        .auth-input-field {
+            @apply w-full px-4 py-3 rounded bg-gray-700 border border-gray-600 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-shadow shadow-sm hover:shadow;
+        }
+        
+        .auth-button {
+            @apply w-full px-4 py-3 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed;
+        }
+        
+        /* Large touch targets for stress conditions */
+        button {
+            min-height: 44px;
+            min-width: 44px;
+        }
+        
+        /* High contrast focus indicators */
+        *:focus {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-900 text-white">
+    {% block content %}{% endblock %}
+    
+    <!-- Toast notifications container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+    
+    <script>
+        // Toast notification system
+        function showToast(message, type = 'info', duration = 5000) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const colors = {
+                'success': 'bg-green-600',
+                'error': 'bg-red-600',
+                'warning': 'bg-yellow-600',
+                'info': 'bg-blue-600'
+            };
+            
+            toast.className = `${colors[type]} text-white px-4 py-3 rounded shadow-lg transform transition-all duration-300 translate-x-full opacity-0`;
+            toast.textContent = message;
+            
+            container.appendChild(toast);
+            
+            // Animate in
+            setTimeout(() => {
+                toast.classList.remove('translate-x-full', 'opacity-0');
+            }, 100);
+            
+            // Auto remove
+            setTimeout(() => {
+                toast.classList.add('translate-x-full', 'opacity-0');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, duration);
+        }
+        
+        // Global error handler
+        window.addEventListener('unhandledrejection', function(event) {
+            showToast('An error occurred: ' + event.reason, 'error');
+        });
+    </script>
+</body>
+</html>
