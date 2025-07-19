@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block title %}Triage Dashboard - Medical Triage System{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-900">
+    <!-- Header -->
+    <header class="sticky top-0 z-10 bg-blue-900/90 backdrop-blur-sm h-16 flex justify-between items-center border-b border-blue-700 shadow-lg px-4">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                <span class="text-white font-bold text-sm">🏥</span>
+            </div>
+            <h2 class="text-xl font-bold text-white">MEDICAL TRIAGE</h2>
+        </div>
+        <a href="/logout" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors">
+            Sign Out
+        </a>
+    </header>
+
+    <!-- Critical Resources Alert -->
+    <div id="resourceAlert" class="bg-red-800 border-l-4 border-red-500 p-4 mb-4 hidden">
+        <div class="flex items-center">
+            <span class="text-red-200 font-bold">⚠️ CRITICAL RESOURCES:</span>
+            <span id="criticalResources" class="ml-2 text-red-100"></span>
+        </div>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="bg-gray-800 border-b border-gray-700 p-4">
+        <div class="flex justify-between items-center text-sm">
+            <div class="flex gap-6">
+                <span class="text-red-400">🟥 <span id="immediateCount">0</span></span>
+                <span class="text-yellow-400">🟨 <span id="delayedCount">0</span></span>
+                <span class="text-green-400">🟩 <span id="minimalCount">0</span></span>
+                <span class="text-gray-400">⬛ <span id="expectantCount">0</span></span>
+            </div>
+            <div class="text-gray-300">
+                Total Active: <span id="totalCount">0</span> | Treated: <span id="treatedCount">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="bg-gray-800 border-b border-gray-700">
+        <div class="flex">
+            <button onclick="setActiveTab('input')" class="tab-button flex-1 py-4 px-2 text-center font-semibold transition-colors bg-blue-600 text-white" data-tab="input">
+                📝 NEW PATIENT
+            </button>
+            <button onclick="setActiveTab('queue')" class="tab-button flex-1 py-4 px-2 text-center font-semibold transition-colors bg-gray-700 text-gray-300 hover:bg-gray-600" data-tab="queue">
+                📋 PATIENT QUEUE
+            </button>
+            <button onclick="setActiveTab('resources')" class="tab-button flex-1 py-4 px-2 text-center font-semibold transition-colors bg-gray-700 text-gray-300 hover:bg-gray-600" data-tab="resources">
+                📦 RESOURCES
+            </button>
+            <button onclick="setActiveTab('stats')" class="tab-button flex-1 py-4 px-2 text-center font-semibold transition-colors bg-gray-700 text-gray-300 hover:bg-gray-600" data-tab="stats">
+                📊 REPORTS
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="p-4">
+        <!-- Patient Input Tab -->
+        <div id="inputTab" class="tab-content">
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+                    <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+                        🏥 Patient Assessment
+                    </h2>
+                    
+                    <form id="patientForm" class="space-y-6">
+                        <!-- Basic Info -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-white font-semibold mb-2">Patient ID</label>
+                                <input type="text" name="patient_id" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white" placeholder="Auto-generated if empty">
+                            </div>
+                            <div>
+                                <label class="block text-white font-semibold mb-2">Medic ID</label>
+                                <input type="text" name="medic" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white" placeholder="Your ID">
+                            </div>
+                        </div>
+
+                        <!-- Vitals -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-white font-semibold mb-2">Respiratory Rate</label>
+                                <input type="number" name="respiratory_rate" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white" placeholder="breaths/min">
+                            </div>
+                            <div>
+                                <label class="block text-white font-semibold mb-2">Pulse</label>
+                                <input type="number" name="pulse" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white" placeholder="bpm">
+                            </div>
+                            <div>
+                                <label class="block text-white font-semibold mb-2">Systolic BP</label>
+                                <input type="number" name="systolic_bp" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white" placeholder="mmHg">
+                            </div>
+                        </div>
+
+                        <!-- Assessment -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-white font-semibold mb-2">Consciousness Level</label>
+                                <select name="consciousness" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white">
+                                    <option value="alert">Alert</option>
+                                    <option value="voice">Responds to Voice</option>
+                                    <option value="pain">Responds to Pain</option>
+                                    <option value="unresponsive">Unresponsive</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-white font-semibold mb-2">Mobility</label>
+                                <select name="can_walk" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white">
+                                    <option value="true">Can Walk</option>
+                                    <option value="false">Cannot Walk</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Injury Assessment -->
+                        <div>
+                            <label class="block text-white font-semibold mb-2">Injury Type (select all that apply)</label>
+                            <div class="grid grid-cols-2 md:grid-cols-5 gap-2">
+                                <label class="flex items-center text-white">
+                                    <input type="checkbox" name="injury_type" value="penetrating" class="mr-2">
+                                    Penetrating
+                                </label>
+                                <label class="flex items-center text-white">
+                                    <input type="checkbox" name="injury_type" value="blunt" class="mr-2">
+                                    Blunt
+                                </label>
+                                <label class="flex items-center text-white">
+                                    <input type="checkbox" name="injury_type" value="burn" class="mr-2">
+                                    Burn
+                                </label>
+                                <label class="flex items-center text-white">
+                                    <input type="checkbox" name="injury_type" value="blast" class="mr-2">
+                                    Blast
+                                </label>
+                                <label class="flex items-center text-white">
+                                    <input type="checkbox" name="injury_type" value="crush" class="mr-2">
+                                    Crush
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-white font-semibold mb-2">Injury Severity</label>
+                                <select name="injury_severity" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white">
+                                    <option value="minor">Minor</option>
+                                    <option value="moderate">Moderate</option>
+                                    <option value="severe">Severe</option>
+                                    <option value="critical">Critical</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-white font-semibold mb-2">Body Regions (select all that apply)</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <label class="flex items-center text-white">
+                                        <input type="checkbox" name="body_regions" value="head" class="mr-2">
+                                        Head
+                                    </label>
+                                    <label class="flex items-center text-white">
+                                        <input type="checkbox" name="body_regions" value="chest" class="mr-2">
+                                        Chest
+                                    </label>
+                                    <label class="flex items-center text-white">
+                                        <input type="checkbox" name="body_regions" value="abdomen" class="mr-2">
+                                        Abdomen
+                                    </label>
+                                    <label class="flex items-center text-white">
+                                        <input type="checkbox" name="body_regions" value="extremities" class="mr-2">
+                                        Extremities
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Demographics -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-white font-semibold mb-2">Estimated Age</label>
+                                <input type="number" name="estimated_age" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white" placeholder="years">
+                            </div>
+                            <div>
+                                <label class="block text-white font-semibold mb-2">Gender</label>
+                                <select name="gender" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white">
+                                    <option value="">Unknown</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div>
+                            <label class="block text-white font-semibold mb-2">Additional Notes</label>
+                            <textarea name="notes" rows="3" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white" placeholder="Additional observations, treatment notes, etc."></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded text-lg transition-colors">
+                            🏥 ASSESS & TRIAGE PATIENT
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patient Queue Tab -->
+        <div id="queueTab" class="tab-content hidden">
+            <div class="max-w-6xl mx-auto">
+                <h2 class="text-2xl font-bold text-white mb-6">📋 Patient Queue</h2>
+                
+                <!-- Filter buttons -->
+                <div class="flex gap-2 mb-6">
+                    <button onclick="filterPatients('all')" class="filter-btn bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition-colors">All</button>
+                    <button onclick="filterPatients('immediate')" class="filter-btn bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors">🟥 Immediate</button>
+                    <button onclick="filterPatients('delayed')" class="filter-btn bg-yellow-600 text-black px-4 py-2 rounded hover:bg-yellow-700 transition-colors">🟨 Delayed</button>
+                    <button onclick="filterPatients('minimal')" class="filter-btn bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors">🟩 Minimal</button>
+                    <button onclick="filterPatients('expectant')" class="filter-btn bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition-colors">⬛ Expectant</button>
+                </div>
+                
+                <div id="patientQueue" class="space-y-4">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Resources Tab -->
+        <div id="resourcesTab" class="tab-content hidden">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-2xl font-bold text-white mb-6">📦 Resource Management</h2>
+                <div id="resourceList" class="space-y-4">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Tab -->
+        <div id="statsTab" class="tab-content hidden">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-2xl font-bold text-white mb-6">📊 Situation Report</h2>
+                <div id="statsContent" class="space-y-6">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/static/app.js"></script>
+{% endblock %}
