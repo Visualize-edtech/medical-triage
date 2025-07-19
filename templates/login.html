@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Medical Triage System{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex flex-col bg-gray-900 text-white">
+    <header class="sticky top-0 z-10 bg-blue-900/90 backdrop-blur-sm h-16 flex justify-between items-center border-b border-blue-700 shadow-lg px-4">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                <span class="text-white font-bold text-sm">🏥</span>
+            </div>
+            <h2 class="text-xl font-bold text-white">MEDICAL TRIAGE</h2>
+        </div>
+    </header>
+    
+    <main class="flex-1 flex flex-col items-center justify-center px-4">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-blue-400 mb-4">
+                🏥 MEDICAL TRIAGE SYSTEM
+            </h1>
+            <p class="text-xl text-gray-300 mb-2">
+                Professional Medical Triage for Emergency Response
+            </p>
+            <p class="text-gray-400">
+                Secure authentication required for medical personnel
+            </p>
+        </div>
+        
+        <div class="w-full max-w-md">
+            <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+                <form id="loginForm" class="space-y-4">
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-gray-300 mb-2">
+                            Username
+                        </label>
+                        <input
+                            type="text"
+                            id="username"
+                            name="username"
+                            required
+                            class="auth-input-field"
+                            placeholder="Enter your username"
+                        >
+                    </div>
+                    
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-300 mb-2">
+                            Password
+                        </label>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            required
+                            class="auth-input-field"
+                            placeholder="Enter your password"
+                        >
+                    </div>
+                    
+                    <button type="submit" class="auth-button" id="loginButton">
+                        Sign In
+                    </button>
+                </form>
+                
+                <div class="mt-4 text-center">
+                    <button
+                        type="button"
+                        class="text-blue-400 hover:text-blue-300 text-sm"
+                        onclick="showRegisterForm()"
+                    >
+                        Need an account? Register here
+                    </button>
+                </div>
+                
+                <!-- Registration Form (hidden by default) -->
+                <form id="registerForm" class="space-y-4 mt-6 hidden">
+                    <h3 class="text-lg font-semibold text-white mb-4">Create Account</h3>
+                    
+                    <div>
+                        <label for="reg_username" class="block text-sm font-medium text-gray-300 mb-2">
+                            Username
+                        </label>
+                        <input
+                            type="text"
+                            id="reg_username"
+                            name="username"
+                            required
+                            class="auth-input-field"
+                            placeholder="Choose a username"
+                        >
+                    </div>
+                    
+                    <div>
+                        <label for="reg_name" class="block text-sm font-medium text-gray-300 mb-2">
+                            Full Name
+                        </label>
+                        <input
+                            type="text"
+                            id="reg_name"
+                            name="name"
+                            class="auth-input-field"
+                            placeholder="Your full name"
+                        >
+                    </div>
+                    
+                    <div>
+                        <label for="reg_email" class="block text-sm font-medium text-gray-300 mb-2">
+                            Email (optional)
+                        </label>
+                        <input
+                            type="email"
+                            id="reg_email"
+                            name="email"
+                            class="auth-input-field"
+                            placeholder="your.email@example.com"
+                        >
+                    </div>
+                    
+                    <div>
+                        <label for="reg_password" class="block text-sm font-medium text-gray-300 mb-2">
+                            Password
+                        </label>
+                        <input
+                            type="password"
+                            id="reg_password"
+                            name="password"
+                            required
+                            class="auth-input-field"
+                            placeholder="Choose a password"
+                        >
+                    </div>
+                    
+                    <button type="submit" class="auth-button" id="registerButton">
+                        Create Account
+                    </button>
+                    
+                    <button
+                        type="button"
+                        class="w-full px-4 py-3 rounded bg-gray-600 text-white font-semibold hover:bg-gray-700 transition-colors"
+                        onclick="showLoginForm()"
+                    >
+                        Back to Login
+                    </button>
+                </form>
+                
+                <div class="mt-6 p-4 bg-blue-900 rounded border border-blue-700">
+                    <h4 class="text-blue-200 font-semibold mb-2">Demo Credentials</h4>
+                    <p class="text-blue-100 text-sm">
+                        Username: <code class="bg-blue-800 px-1 rounded">admin</code><br>
+                        Password: <code class="bg-blue-800 px-1 rounded">admin123</code>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    function showRegisterForm() {
+        document.getElementById('loginForm').classList.add('hidden');
+        document.getElementById('registerForm').classList.remove('hidden');
+    }
+    
+    function showLoginForm() {
+        document.getElementById('registerForm').classList.add('hidden');
+        document.getElementById('loginForm').classList.remove('hidden');
+    }
+    
+    // Login form handler
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const button = document.getElementById('loginButton');
+        button.disabled = true;
+        button.textContent = 'Signing In...';
+        
+        const formData = new FormData(e.target);
+        const data = {
+            username: formData.get('username'),
+            password: formData.get('password')
+        };
+        
+        try {
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showToast('Login successful! Redirecting...', 'success');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1000);
+            } else {
+                showToast(result.message, 'error');
+            }
+        } catch (error) {
+            showToast('Login failed: ' + error.message, 'error');
+        } finally {
+            button.disabled = false;
+            button.textContent = 'Sign In';
+        }
+    });
+    
+    // Register form handler
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const button = document.getElementById('registerButton');
+        button.disabled = true;
+        button.textContent = 'Creating Account...';
+        
+        const formData = new FormData(e.target);
+        const data = {
+            username: formData.get('username'),
+            name: formData.get('name'),
+            email: formData.get('email'),
+            password: formData.get('password')
+        };
+        
+        try {
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showToast('Account created successfully! Redirecting...', 'success');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1000);
+            } else {
+                showToast(result.message, 'error');
+            }
+        } catch (error) {
+            showToast('Registration failed: ' + error.message, 'error');
+        } finally {
+            button.disabled = false;
+            button.textContent = 'Create Account';
+        }
+    });
+</script>
+{% endblock %}
